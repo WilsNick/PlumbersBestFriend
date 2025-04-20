@@ -2,16 +2,39 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
 function BasketPage() {
-    const { clientId } = useParams();
+    const { clientId, projectId } = useParams();
     const navigate = useNavigate();
     const [basket, setBasket] = useState([]);
+    const [projectName, setProjectName] = useState('');
+    const [clients, setClients] = useState([]);
+    const [projects, setProjects] = useState({});
 
-    const clients = JSON.parse(localStorage.getItem('clients') || '[]');
-    const client = clients.find(c => c.id === clientId);
+    // Load the clients and projects only once when the component mounts
     useEffect(() => {
-        const allBaskets = JSON.parse(localStorage.getItem('baskets') || '{}');
-        setBasket(allBaskets[clientId] || []);
-    }, [clientId]);
+        const loadedClients = JSON.parse(localStorage.getItem('clients') || '[]');
+        const loadedProjects = JSON.parse(localStorage.getItem('projects') || '{}');
+        setClients(loadedClients);
+        setProjects(loadedProjects);
+    }, []);
+
+    useEffect(() => {
+        // Ensure client and project are found before setting states
+        const client = clients.find(c => c.id === clientId);
+        if (client) {
+            // Look for the project within the client's projects
+            const project = projects[clientId]?.find(p => p.id === projectId);
+            if (project) {
+                setProjectName(project.name);
+            } else {
+                setProjectName('Project niet gevonden');
+            }
+
+            // Get the basket for the project if it exists
+            const allBaskets = JSON.parse(localStorage.getItem('baskets') || '{}');
+            const projectBasket = allBaskets[clientId]?.[projectId] || [];
+            setBasket(projectBasket);
+        }
+    }, [clientId, projectId, clients, projects]); // dependencies only on actual client/project info
 
     const total = basket.reduce((sum, p) => {
         const price = parseFloat(p.price.replace(',', '.'));
@@ -36,7 +59,7 @@ function BasketPage() {
                         marginRight: 20
                     }}
                 >
-                    ← Back
+                    ← Terug
                 </button>
                 <h1 style={{
                     textAlign: 'center',
@@ -44,7 +67,10 @@ function BasketPage() {
                     flex: 1,
                     color: 'white',
                     margin: 0
-                }}>🧺 Basket for Client {client.name}</h1>
+                }}>
+                    🧺 Winkelmandje van {clients.find(c => c.id === clientId)?.name || 'Onbekend'} <br/>
+                    Project: {projectName}
+                </h1>
 
                 <div style={{ width: 80 }} /> {/* Spacer to balance layout */}
             </div>
@@ -56,9 +82,9 @@ function BasketPage() {
                     <thead className="bg-gray-100">
                     <tr>
                         <th className="text-left p-2">Product</th>
-                        <th className="text-center p-2">Qty</th>
-                        <th className="text-right p-2">Price</th>
-                        <th className="text-right p-2">Total</th>
+                        <th className="text-center p-2">Hoeveelheid</th>
+                        <th className="text-right p-2">Prijs artikel</th>
+                        <th className="text-right p-2">Totaal</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -78,12 +104,11 @@ function BasketPage() {
                 </table>
             )}
 
-            <p className="text-right font-semibold text-lg mt-4">Total: €{total}</p>
-
-
+            <p className="text-right font-semibold text-lg mt-4" style={{color:"red"}}>Totaal: €{total}</p>
         </div>
     );
 }
+
 const buttonStyle = {
     padding: '6px 10px',
     borderRadius: '5px',
@@ -93,4 +118,5 @@ const buttonStyle = {
     cursor: 'pointer',
     fontWeight: 'bold'
 };
+
 export default BasketPage;

@@ -65,7 +65,7 @@ function ClientInfoPage() {
                     marginRight: 20
                 }}
             >
-                ← Back
+                ← Terug
             </button>
                 <h1 style={{
                     textAlign: 'center',
@@ -73,7 +73,7 @@ function ClientInfoPage() {
                     flex: 1,
                     color: 'white',
                     margin: 0
-                }}>Edit Client Info</h1>
+                }}>Wijzig info klant</h1>
                 <div style={{ width: 80 }} /> {/* Spacer to balance layout */}
 
             </div>
@@ -88,7 +88,7 @@ function ClientInfoPage() {
                             marginLeft: '15px',
                             backgroundColor: 'green'
                         }}
-            >Save</button>
+            >Opslaan</button>
 
             {/* Archive/Unarchive Button */}
             <div style={{ marginTop: 20 }}>
@@ -104,7 +104,7 @@ function ClientInfoPage() {
                         marginRight: '15px', // Added space between this button and the next
                     }}
                 >
-                    {isArchived ? 'Undo Archive' : 'Archive Client'}
+                    {isArchived ? 'archiveren ongedaan maken' : 'Archiveer klant'}
                 </button>
 
                 <button
@@ -118,7 +118,7 @@ function ClientInfoPage() {
                         marginTop: '10px', // Added space between this and the previous button
                     }}
                 >
-                    Delete Client
+                    Verwijder klant
                 </button>
             </div>
 
@@ -140,9 +140,9 @@ function ClientInfoPage() {
                         textAlign: 'center',
                         color: 'black',
                     }}>
-                        <p>Are you sure you want to delete "{client.name}"?</p>
-                        <button onClick={confirmDelete} style={{ marginRight: 10 }}>Yes</button>
-                        <button onClick={() => setShowConfirm(false)}>Cancel</button>
+                        <p>Weet je zeker dat je klant "{client.name}" wilt verwijderen?</p>
+                        <button onClick={confirmDelete} style={{ marginRight: 10 }}>Ja</button>
+                        <button onClick={() => setShowConfirm(false)}>Annuleer</button>
                     </div>
                 </div>
             )}

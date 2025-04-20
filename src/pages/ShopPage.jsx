@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 function ShopPage() {
-    const { clientId } = useParams();
+    const { clientId, projectId } = useParams();
     const navigate = useNavigate();
 
     const [products, setProducts] = useState([]);
@@ -10,8 +10,8 @@ function ShopPage() {
     const [basket, setBasket] = useState([]);
     const [page, setPage] = useState(1);
     const [clientName, setClientName] = useState('');
+    const [projectName, setProjectName] = useState('');  // Add state for project name
     const perPage = 10;
-
 
     useEffect(() => {
         fetch('/products.json')
@@ -20,21 +20,30 @@ function ShopPage() {
     }, []);
 
     useEffect(() => {
-        // Load client name from localStorage
         const clients = JSON.parse(localStorage.getItem('clients') || '[]');
         const client = clients.find(c => String(c.id) === clientId);
         setClientName(client?.name || `Client ${clientId}`);
     }, [clientId]);
 
     useEffect(() => {
+        const projects = JSON.parse(localStorage.getItem('projects') || '{}');
+        const clientProjects = projects[clientId] || [];
+        const project = clientProjects.find(p => p.id === projectId);
+        setProjectName(project?.name || 'Onbekend Project');
+    }, [clientId, projectId]);  // Add dependency for projectId
+
+    useEffect(() => {
         const saved = JSON.parse(localStorage.getItem('baskets') || '{}');
-        const clientBasket = saved[clientId] || [];
-        setBasket(clientBasket);
-    }, [clientId]);
+        const clientBaskets = saved[clientId] || {};
+        const projectBasket = clientBaskets[projectId] || [];
+        setBasket(projectBasket);
+    }, [clientId, projectId]);
 
     const saveBasket = (newBasket) => {
         const allBaskets = JSON.parse(localStorage.getItem('baskets') || '{}');
-        allBaskets[clientId] = newBasket;
+        const clientBaskets = allBaskets[clientId] || {};
+        clientBaskets[projectId] = newBasket;
+        allBaskets[clientId] = clientBaskets;
         localStorage.setItem('baskets', JSON.stringify(allBaskets));
         setBasket(newBasket);
     };
@@ -91,7 +100,7 @@ function ShopPage() {
 
     return (
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: 20, fontFamily: 'Arial, sans-serif' }}>
-            {/* Header with back button and client name */}
+            {/* Header */}
             <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -102,13 +111,9 @@ function ShopPage() {
             }}>
                 <button
                     onClick={() => navigate(`/client/${clientId}`)}
-                    style={{
-                        ...buttonStyle,
-                        backgroundColor: '#6c757d',
-                        marginRight: 20
-                    }}
+                    style={{ ...buttonStyle, backgroundColor: '#6c757d', marginRight: 20 }}
                 >
-                    ← Back
+                    ← Terug
                 </button>
                 <h1 style={{
                     textAlign: 'center',
@@ -117,14 +122,15 @@ function ShopPage() {
                     color: 'white',
                     margin: 0
                 }}>
-                    🛍️ {clientName}'s Shop
+                    🛍️ {clientName}'s Winkel: <br/>
+                    Project: {projectName} {/* Include project name */}
                 </h1>
-                <div style={{ width: 80 }} /> {/* Spacer to balance layout */}
+                <div style={{ width: 80 }} /> {/* Spacer */}
             </div>
 
-            {/* Search Input */}
+            {/* Search */}
             <input
-                placeholder="Search products..."
+                placeholder="Zoek producten..."
                 value={search}
                 onChange={(e) => {
                     setSearch(e.target.value);
@@ -142,15 +148,15 @@ function ShopPage() {
 
             {/* Product Table */}
             <table style={tableStyle}>
-                <thead style={{ backgroundColor: '#f8f8f8' }}>
+                <thead>
                 <tr>
                     <th style={tableHeaderStyle}>Product</th>
-                    <th style={tableHeaderStyle}>Kind</th>
-                    <th style={tableHeaderStyle}>Unit</th>
-                    <th style={tableHeaderStyle}>Price</th>
-                    <th style={tableHeaderStyle}>Product ID</th>
-                    <th style={tableHeaderStyle}>Quantity</th>
-                    <th style={tableHeaderStyle}>Actions</th>
+                    <th style={tableHeaderStyle}>Artikel</th>
+                    <th style={tableHeaderStyle}>Soort</th>
+                    <th style={tableHeaderStyle}>Eenheid</th>
+                    <th style={tableHeaderStyle}>Prijs</th>
+                    <th style={tableHeaderStyle}>Hoeveelheid</th>
+                    <th style={tableHeaderStyle}></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -159,10 +165,10 @@ function ShopPage() {
                     return (
                         <tr key={p.product_id} style={tableRowStyle}>
                             <td style={tableCellStyle}>{p.description}</td>
+                            <td style={tableCellStyle}>{p.product_id}</td>
                             <td style={tableCellStyle}>{p.kind}</td>
                             <td style={tableCellStyle}>{p.unit}</td>
                             <td style={tableCellStyle}>€{p.price}</td>
-                            <td style={tableCellStyle}>{p.product_id}</td>
                             <td style={tableCellStyle}>
                                 <input
                                     type="number"
@@ -174,11 +180,9 @@ function ShopPage() {
                             </td>
                             <td style={tableCellStyle}>
                                 <div style={{ display: 'flex', gap: '8px' }}>
-
-                                <button onClick={() => decrement(p)} style={buttonStyle}>-</button>
-                                <button onClick={() => increment(p)} style={buttonStyle}>+</button>
+                                    <button onClick={() => decrement(p)} style={buttonStyle}>-</button>
+                                    <button onClick={() => increment(p)} style={buttonStyle}>+</button>
                                 </div>
-
                             </td>
                         </tr>
                     );
@@ -188,21 +192,21 @@ function ShopPage() {
 
             {/* Pagination */}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
-                <button disabled={page === 1} onClick={() => setPage(p => p - 1)} style={paginationButtonStyle}>← Prev</button>
-                <span style={{ alignSelf: 'center' }}>Page {page} of {totalPages}</span>
-                <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)} style={paginationButtonStyle}>Next →</button>
+                <button disabled={page === 1} onClick={() => setPage(p => p - 1)} style={paginationButtonStyle}>← Vorige</button>
+                <span style={{ alignSelf: 'center' }}>Pagina {page} van {totalPages}</span>
+                <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)} style={paginationButtonStyle}>Volgende →</button>
             </div>
 
-            {/* Basket Table */}
-            <h2 style={{ fontSize: '1.8rem', marginTop: 40 }}>🧺 Your Basket</h2>
-            {basket.length === 0 ? <p>No items in your basket.</p> : (
+            {/* Basket Section */}
+            <h2 style={{ fontSize: '1.8rem', marginTop: 40 }}>🧺 Winkelmandje</h2>
+            {basket.length === 0 ? <p>Geen artikels in jouw mandje.</p> : (
                 <table style={tableStyle}>
-                    <thead style={{ backgroundColor: '#f8f8f8' }}>
+                    <thead>
                     <tr>
                         <th style={tableHeaderStyle}>Product</th>
-                        <th style={tableHeaderStyle}>Qty</th>
-                        <th style={tableHeaderStyle}>Price</th>
-                        <th style={tableHeaderStyle}>Total</th>
+                        <th style={tableHeaderStyle}>Hoeveelheid</th>
+                        <th style={tableHeaderStyle}>Prijs</th>
+                        <th style={tableHeaderStyle}>Totaal</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -221,12 +225,12 @@ function ShopPage() {
                     </tbody>
                 </table>
             )}
-            <p><strong>Total:</strong> €{total}</p>
+            <p><strong>Totaal:</strong> €{total}</p>
         </div>
     );
 }
 
-// Reusable Styles
+// Reusable styles
 const tableStyle = {
     width: '100%',
     borderCollapse: 'collapse',
@@ -239,7 +243,7 @@ const tableHeaderStyle = {
     fontWeight: 'bold',
     borderBottom: '2px solid #ddd',
     textAlign: 'left',
-    color: '#333',
+    color: '#999',
 };
 
 const tableRowStyle = {
@@ -258,7 +262,6 @@ const buttonStyle = {
     backgroundColor: '#28a745',
     color: 'white',
     cursor: 'pointer',
-    marginRight: '5px',
     fontWeight: 'bold'
 };
 
@@ -277,4 +280,3 @@ const inputStyle = {
 };
 
 export default ShopPage;
-

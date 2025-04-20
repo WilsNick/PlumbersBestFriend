@@ -1,18 +1,17 @@
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import ClientInfoPage from './pages/ClientInfoPage';
-import ShopPage from './pages/ShopPage';
-import BasketPage from './pages/BasketPage';
 
 import LoginPage from './pages/LoginPage';
 import ClientsPage from './pages/ClientsPage';
 import ClientPage from './pages/ClientPage';
+import ClientInfoPage from './pages/ClientInfoPage';
+import ShopPage from './pages/ShopPage';
+import BasketPage from './pages/BasketPage';
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
 
-    // Check login status on first load
     useEffect(() => {
         const stored = localStorage.getItem('loggedIn');
         if (stored === 'true') {
@@ -52,11 +51,11 @@ function App() {
                 element={isLoggedIn ? <ClientInfoPage /> : <Navigate to="/" />}
             />
             <Route
-                path="/client/:clientId/shop"
+                path="/client/:clientId/project/:projectId/shop"
                 element={isLoggedIn ? <ShopPage /> : <Navigate to="/" />}
             />
             <Route
-                path="/client/:clientId/basket"
+                path="/client/:clientId/project/:projectId/basket"
                 element={isLoggedIn ? <BasketPage /> : <Navigate to="/" />}
             />
         </Routes>
