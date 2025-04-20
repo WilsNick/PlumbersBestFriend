@@ -10,6 +10,7 @@ function ClientInfoPage() {
 
     const [newName, setNewName] = useState(client?.name || '');
     const [isArchived, setIsArchived] = useState(client?.archived || false);
+    const [showConfirm, setShowConfirm] = useState(false); // State for showing the confirmation modal
 
     const handleRename = () => {
         if (!newName.trim()) return alert('Name cannot be empty');
@@ -31,35 +32,130 @@ function ClientInfoPage() {
         localStorage.setItem('clients', JSON.stringify(updatedClients));
     };
 
+    const handleDeleteClient = () => {
+        const updatedClients = storedClients.filter(c => c.id !== clientId);
+        localStorage.setItem('clients', JSON.stringify(updatedClients));
+        navigate('/dashboard');
+    };
+
+    // Show the confirmation modal when the delete button is clicked
+    const confirmDelete = () => {
+        handleDeleteClient();
+        setShowConfirm(false); // Close the modal after deletion
+    };
+
     if (!client) return <div>Client not found</div>;
 
     return (
-        <div style={{ padding: 20 }}>
-            <h2>Edit Client Info</h2>
+
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: 20, fontFamily: 'Arial, sans-serif' }}>
+            <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 30,
+                paddingBottom: 10,
+                borderBottom: '2px solid #ccc'
+            }}>
+            <button
+                onClick={() => navigate(`/client/${clientId}`)}
+                style={{
+                    ...buttonStyle,
+                    backgroundColor: '#6c757d',
+                    marginRight: 20
+                }}
+            >
+                ← Back
+            </button>
+                <h1 style={{
+                    textAlign: 'center',
+                    fontSize: '2.2rem',
+                    flex: 1,
+                    color: 'white',
+                    margin: 0
+                }}>Edit Client Info</h1>
+                <div style={{ width: 80 }} /> {/* Spacer to balance layout */}
+
+            </div>
+
             <input
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
             />
-            <button onClick={handleRename}>Save</button>
-            <button onClick={() => navigate(`/client/${clientId}`)}>← Back</button>
+            <button onClick={handleRename}
+                    style={{
+                            marginRight: '15px',
+                            marginLeft: '15px',
+                            backgroundColor: 'green'
+                        }}
+            >Save</button>
 
             {/* Archive/Unarchive Button */}
             <div style={{ marginTop: 20 }}>
                 <button
                     onClick={handleArchiveToggle}
                     style={{
-                        backgroundColor: isArchived ? 'green' : 'red',
+                        backgroundColor: isArchived ? 'green' : 'orange',
                         color: 'white',
                         padding: '10px',
                         borderRadius: '5px',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        marginBottom: '15px', // Added space between this button and the next
+                        marginRight: '15px', // Added space between this button and the next
                     }}
                 >
                     {isArchived ? 'Undo Archive' : 'Archive Client'}
                 </button>
+
+                <button
+                    onClick={() => setShowConfirm(true)} // Show the confirmation modal
+                    style={{
+                        backgroundColor: 'red',
+                        color: 'white',
+                        padding: '10px',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        marginTop: '10px', // Added space between this and the previous button
+                    }}
+                >
+                    Delete Client
+                </button>
             </div>
+
+            {/* Confirmation Modal */}
+            {showConfirm && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}>
+                    <div style={{
+                        backgroundColor: 'white',
+                        padding: 20,
+                        borderRadius: 8,
+                        maxWidth: 300,
+                        textAlign: 'center',
+                        color: 'black',
+                    }}>
+                        <p>Are you sure you want to delete "{client.name}"?</p>
+                        <button onClick={confirmDelete} style={{ marginRight: 10 }}>Yes</button>
+                        <button onClick={() => setShowConfirm(false)}>Cancel</button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
-
+const buttonStyle = {
+    padding: '6px 10px',
+    borderRadius: '5px',
+    border: '1px solid #ccc',
+    backgroundColor: '#28a745',
+    color: 'white',
+    cursor: 'pointer',
+    fontWeight: 'bold'
+};
 export default ClientInfoPage;

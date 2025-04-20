@@ -1,8 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function LoginPage({ onLogin }) {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const stored = localStorage.getItem('loggedIn');
+        if (stored === 'true') {
+            navigate('/dashboard');
+        }
+    }, [navigate]);
 
     const handleLoginClick = () => {
         if (password === '') {

@@ -19,8 +19,35 @@ function BasketPage() {
     }, 0).toFixed(2);
 
     return (
-        <div className="max-w-4xl mx-auto p-6">
-            <h2 className="text-2xl font-bold mb-4">🧺 Basket for Client {client.name}</h2>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: 20, fontFamily: 'Arial, sans-serif' }}>
+            <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 30,
+                paddingBottom: 10,
+                borderBottom: '2px solid #ccc'
+            }}>
+                <button
+                    onClick={() => navigate(`/client/${clientId}`)}
+                    style={{
+                        ...buttonStyle,
+                        backgroundColor: '#6c757d',
+                        marginRight: 20
+                    }}
+                >
+                    ← Back
+                </button>
+                <h1 style={{
+                    textAlign: 'center',
+                    fontSize: '2.2rem',
+                    flex: 1,
+                    color: 'white',
+                    margin: 0
+                }}>🧺 Basket for Client {client.name}</h1>
+
+                <div style={{ width: 80 }} /> {/* Spacer to balance layout */}
+            </div>
 
             {basket.length === 0 ? (
                 <p className="text-gray-500">No items in basket</p>
@@ -53,16 +80,17 @@ function BasketPage() {
 
             <p className="text-right font-semibold text-lg mt-4">Total: €{total}</p>
 
-            <div className="mt-6">
-                <button
-                    onClick={() => navigate(`/client/${clientId}`)}
-                    className="text-blue-600 hover:underline"
-                >
-                    ← Back to Client
-                </button>
-            </div>
+
         </div>
     );
 }
-
+const buttonStyle = {
+    padding: '6px 10px',
+    borderRadius: '5px',
+    border: '1px solid #ccc',
+    backgroundColor: '#28a745',
+    color: 'white',
+    cursor: 'pointer',
+    fontWeight: 'bold'
+};
 export default BasketPage;

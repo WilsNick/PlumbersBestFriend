@@ -55,7 +55,10 @@ function App() {
                 path="/client/:clientId/shop"
                 element={isLoggedIn ? <ShopPage /> : <Navigate to="/" />}
             />
-            <Route path="/client/:clientId/basket" element={<BasketPage />} />
+            <Route
+                path="/client/:clientId/basket"
+                element={isLoggedIn ? <BasketPage /> : <Navigate to="/" />}
+            />
         </Routes>
     );
 }
