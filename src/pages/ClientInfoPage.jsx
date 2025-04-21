@@ -33,10 +33,32 @@ function ClientInfoPage() {
     };
 
     const handleDeleteClient = () => {
+        // Remove the client
         const updatedClients = storedClients.filter(c => c.id !== clientId);
         localStorage.setItem('clients', JSON.stringify(updatedClients));
+
+        // Get all remaining client IDs
+        const validClientIds = new Set(updatedClients.map(c => c.id));
+
+        // Remove orphaned projects
+        const storedProjects = JSON.parse(localStorage.getItem('projects') || '{}');
+        const cleanedProjects = Object.fromEntries(
+            Object.entries(storedProjects).filter(([id]) => validClientIds.has(id))
+        );
+        localStorage.setItem('projects', JSON.stringify(cleanedProjects));
+
+        // Remove orphaned baskets
+        const storedBaskets = JSON.parse(localStorage.getItem('baskets') || '{}');
+        const cleanedBaskets = Object.fromEntries(
+            Object.entries(storedBaskets).filter(([id]) => validClientIds.has(id))
+        );
+        localStorage.setItem('baskets', JSON.stringify(cleanedBaskets));
+
+        // Navigate away
         navigate('/dashboard');
     };
+
+
 
     // Show the confirmation modal when the delete button is clicked
     const confirmDelete = () => {

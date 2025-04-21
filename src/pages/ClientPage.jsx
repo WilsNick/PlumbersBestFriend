@@ -54,15 +54,31 @@ function ClientPage() {
     const handleDeleteProject = () => {
         if (projectToDelete) {
             const allProjects = JSON.parse(localStorage.getItem('projects') || '{}');
+            const allBaskets = JSON.parse(localStorage.getItem('baskets') || '{}');
+
             const clientProjects = allProjects[clientId] || [];
             const updatedProjects = clientProjects.filter(p => p.id !== projectToDelete);
 
             allProjects[clientId] = updatedProjects;
+
+            // Remove project basket
+            if (allBaskets[clientId] && allBaskets[clientId][projectToDelete]) {
+                delete allBaskets[clientId][projectToDelete];
+
+                // If client has no baskets left, remove the client entry too
+                if (Object.keys(allBaskets[clientId]).length === 0) {
+                    delete allBaskets[clientId];
+                }
+            }
+
             localStorage.setItem('projects', JSON.stringify(allProjects));
+            localStorage.setItem('baskets', JSON.stringify(allBaskets));
             setProjects(updatedProjects);
-            setShowConfirm(false); // Close the confirmation modal
+            setShowConfirm(false);
         }
     };
+
+
 
     const filteredProjects = projects.filter(p =>
         p.name.toLowerCase().includes(search.toLowerCase())
