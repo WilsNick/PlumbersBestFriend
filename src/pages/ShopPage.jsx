@@ -86,9 +86,12 @@ function ShopPage() {
     const getQuantity = (productId) =>
         basket.find(p => p.product_id === productId)?.quantity || 0;
 
-    const filtered = products.filter(p =>
-        p.description.toLowerCase().includes(search.toLowerCase())
-    );
+    const filtered = products.filter(p => {
+        const searchWords = search.toLowerCase().split(' ').filter(Boolean);
+        const description = p.description.toLowerCase();
+        return searchWords.every(word => description.includes(word));
+    });
+
 
     const paginated = filtered.slice((page - 1) * perPage, page * perPage);
     const totalPages = Math.ceil(filtered.length / perPage);
